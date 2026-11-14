@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Usia</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="FADIL.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ink: '#10302B',
+                        paper: '#EEF2F0',
+                        accent: '#E4572E',
+                        softAccent: '#FFB59E',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #e9e9e9; /* Diubah dari #ebac00 menjadi merah */
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom styling for sleek date input */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: invert(14%) sepia(28%) saturate(1468%) hue-rotate(124deg) brightness(96%) contrast(92%);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-center items-center p-4 sm:p-6 md:p-8">
+
+    <!-- Main Container -->
+    <main class="w-full max-w-lg mx-auto bg-[#EEF2F0]">
+        
+        <!-- Header Section -->
+        <header class="mb-6">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-ink tracking-tight">
+                Berapa usiamu?
+            </h1>
+            <p class="text-ink/70 mt-1 text-sm sm:text-base">
+                Masukkan nama dan tanggal lahir untuk menghitung usiamu.
+            </p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="space-y-3 mb-6">
+            <!-- Name Input Box -->
+            <div class="bg-white rounded-2xl shadow-sm border border-black/5 p-4 transition-all focus-within:ring-2 focus-within:ring-accent/50">
+                <label for="username" class="block text-xs font-semibold uppercase tracking-wider text-ink/60 mb-1">
+                    Nama Lengkap
+                </label>
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-user text-ink"></i>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        placeholder="Contoh: Budi Santoso"
+                        class="w-full bg-transparent text-ink font-semibold text-base sm:text-lg outline-none placeholder:font-normal placeholder:text-ink/40"
+                        oninput="hitungSemuaUsia()"
+                    >
+                </div>
+            </div>
+
+            <!-- Date Input Box -->
+            <div class="bg-white rounded-2xl shadow-sm border border-black/5 p-4 transition-all focus-within:ring-2 focus-within:ring-accent/50">
+                <label for="birthdate" class="block text-xs font-semibold uppercase tracking-wider text-ink/60 mb-1">
+                    Tanggal Lahir
+                </label>
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-cake-candles text-ink"></i>
+                    <input 
+                        type="date" 
+                        id="birthdate" 
+                        class="w-full bg-transparent text-ink font-semibold text-base sm:text-lg outline-none cursor-pointer"
+                        onchange="hitungSemuaUsia()"
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="empty-state" class="py-16 text-center animate-fade-in">
+            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-ink/40 text-2xl shadow-sm">
+                <i class="fa-regular fa-calendar-days"></i>
+            </div>
+            <p class="text-ink/60 text-sm sm:text-base">
+                Pilih tanggal lahir di atas untuk melihat kalkulasi usia.
+            </p>
+        </div>
+
+        <!-- Result Container (Hidden by default) -->
+        <div id="result-container" class="hidden space-y-6 animate-fade-in">
+            
+            <!-- Main Hero Card (Dark Ink Theme) -->
+            <div class="bg-ink text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+                <!-- Decorative background elements -->
+                <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+                
+                <!-- Greeting Header -->
+                <div id="greeting-name" class="text-lg sm:text-xl font-medium text-white/80 mb-2">
+                    Halo!
+                </div>
+
+                <div class="flex items-baseline gap-2">
+                    <span id="res-tahun" class="text-7xl sm:text-8xl font-black tracking-tighter leading-none">0</span>
+                    <span class="text-xl sm:text-2xl text-white/70 font-medium">tahun</span>
+                </div>
+                
+                <div id="res-detail-bulan-hari" class="text-lg sm:text-xl font-semibold text-softAccent mt-3">
+                    0 bulan, 0 hari
+                </div>
+            </div>
+
+            <!-- Detail List Section -->
+            <div class="space-y-4 bg-white/60 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-black/5 shadow-sm">
+                
+                <!-- Next Birthday -->
+                <div class="flex items-start gap-4 p-2">
+                    <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent text-lg flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-cake-candles"></i>
+                    </div>
+                    <div>
+                        <div id="ultah-judul" class="text-xs sm:text-sm text-ink/65 font-medium">Ulang tahun berikutnya</div>
+                        <div id="ultah-isi" class="text-base sm:text-lg font-semibold text-ink mt-0.5">-</div>
+                    </div>
+                </div>
+
+                <div class="border-b border-black/5"></div>
+
+                <!-- Day of Birth -->
+                <div class="flex items-start gap-4 p-2">
+                    <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent text-lg flex-shrink-0 mt-0.5">
+                        <i class="fa-regular fa-calendar-check"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs sm:text-sm text-ink/65 font-medium">Lahir pada hari</div>
+                        <div id="res-hari-lahir" class="text-base sm:text-lg font-semibold text-ink mt-0.5">-</div>
+                    </div>
+                </div>
+
+                <div class="border-b border-black/5"></div>
+
+                <!-- Total Days -->
+                <div class="flex items-start gap-4 p-2">
+                    <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent text-lg flex-shrink-0 mt-0.5">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs sm:text-sm text-ink/65 font-medium">Total hari</div>
+                        <div id="res-total-hari" class="text-base sm:text-lg font-semibold text-ink mt-0.5">-</div>
+                    </div>
+                </div>
+
+                <div class="border-b border-black/5"></div>
+
+                <!-- Total Hours -->
+                <div class="flex items-start gap-4 p-2">
+                    <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent text-lg flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs sm:text-sm text-ink/65 font-medium">Total jam</div>
+                        <div id="res-total-jam" class="text-base sm:text-lg font-semibold text-ink mt-0.5">-</div>
+                    </div>
+                </div>
+
+                <div class="border-b border-black/5"></div>
+
+                <!-- Total Months -->
+                <div class="flex items-start gap-4 p-2">
+                    <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent text-lg flex-shrink-0 mt-0.5">
+                        <i class="fa-regular fa-calendar font-bold"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs sm:text-sm text-ink/65 font-medium">Total bulan</div>
+                        <div id="res-total-bulan" class="text-base sm:text-lg font-semibold text-ink mt-0.5">-</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Calculation Logic -->
+    <script>
+        const HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const BULAN = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+
+        // Format number with dots as thousands separator (Indonesian standard)
+        function formatAngka(n) {
+            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Format Date into Indonesian readable format (e.g. 15 Agustus 2000)
+        function formatTanggal(d) {
+            return `${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        // Calculate Age Breakdown (Years, Months, Days) matching Flutter algorithm
+        function hitungUsia(lahir, sekarang) {
+            let y = sekarang.getFullYear() - lahir.getFullYear();
+            let m = sekarang.getMonth() - lahir.getMonth();
+            let d = sekarang.getDate() - lahir.getDate();
+
+            if (d < 0) {
+                m -= 1;
+                // Get days in previous month
+                const prevMonthDays = new Date(sekarang.getFullYear(), sekarang.getMonth(), 0).getDate();
+                d += prevMonthDays;
+            }
+
+            if (m < 0) {
+                y -= 1;
+                m += 12;
+            }
+
+            return { tahun: y, bulan: m, hari: d };
+        }
+
+        // Get Next Birthday Date
+        function ulangTahunBerikutnya(lahir, hariIni) {
+            let next = new Date(hariIni.getFullYear(), lahir.getMonth(), lahir.getDate());
+            
+            // Normalize time components for accurate comparisons
+            next.setHours(0, 0, 0, 0);
+            const today = new Date(hariIni);
+            today.setHours(0, 0, 0, 0);
+
+            if (next < today) {
+                next = new Date(hariIni.getFullYear() + 1, lahir.getMonth(), lahir.getDate());
+            }
+            return next;
+        }
+
+        // Restrict maximum date to today in date picker
+        window.onload = function() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('birthdate').setAttribute('max', todayStr);
+        };
+
+        function hitungSemuaUsia() {
+            const dateInput = document.getElementById('birthdate').value;
+            if (!dateInput) return;
+
+            const nameInput = document.getElementById('username').value.trim();
+            const displayName = nameInput || '';
+
+            // Parse selected date and current date (time stripped to midnight for exact calculations)
+            const parts = dateInput.split('-');
+            const lahir = new Date(parts[0], parts[1] - 1, parts[2]);
+            
+            const now = new Date();
+            const hariIni = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            // Validate date is not in future
+            if (lahir > hariIni) {
+                return;
+            }
+
+            // Perform calculations
+            const usia = hitungUsia(lahir, hariIni);
+
+            // Total days difference calculation
+            const diffTime = hariIni.getTime() - lahir.getTime();
+            const totalHari = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const totalMinggu = Math.floor(totalHari / 7);
+            const totalJam = totalHari * 24;
+            const totalBulan = (usia.tahun * 12) + usia.bulan;
+
+            // Next Birthday calculation
+            const next = ulangTahunBerikutnya(lahir, hariIni);
+            const sisaHari = Math.round((next.getTime() - hariIni.getTime()) / (1000 * 60 * 60 * 24));
+            const ultahHariIni = (sisaHari === 0);
+            const umurBerikut = next.getFullYear() - lahir.getFullYear();
+
+            // Dynamic Greeting & Name Logic
+            const greetingElem = document.getElementById('greeting-name');
+            if (displayName) {
+                greetingElem.innerText = `Halo, ${displayName}! 👋`;
+            } else {
+                greetingElem.innerText = `Halo! 👋`;
+            }
+
+            // Update UI elements
+            document.getElementById('res-tahun').innerText = usia.tahun;
+            document.getElementById('res-detail-bulan-hari').innerText = `${usia.bulan} bulan, ${usia.hari} hari`;
+
+            // Birthday Row
+            const ultahJudul = document.getElementById('ultah-judul');
+            const ultahIsi = document.getElementById('ultah-isi');
+            const sapaanNama = displayName ? `, ${displayName}` : '';
+
+            if (ultahHariIni) {
+                ultahJudul.innerText = `Selamat ulang tahun ke-${usia.tahun}${sapaanNama}! 🎉`;
+                ultahIsi.innerText = 'Hari ini hari spesialmu!';
+            } else {
+                ultahJudul.innerText = `Ulang tahun ke-${umurBerikut}`;
+                ultahIsi.innerText = `${sisaHari} hari lagi, ${formatTanggal(next)}`;
+            }
+
+            // Other Stats Rows
+            document.getElementById('res-hari-lahir').innerText = HARI[lahir.getDay()];
+            document.getElementById('res-total-hari').innerText = `${formatAngka(totalHari)} hari (${formatAngka(totalMinggu)} minggu)`;
+            document.getElementById('res-total-jam').innerText = `${formatAngka(totalJam)} jam`;
+            document.getElementById('res-total-bulan').innerText = `${formatAngka(totalBulan)} bulan`;
+
+            // Toggle visibility
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('result-container').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
